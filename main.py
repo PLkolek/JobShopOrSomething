@@ -46,10 +46,17 @@ class Problem:
         return directed + [edge[::-1] for edge in directed]
 
     def asGraph(self):
-        return ProblemGraph(self.__directedEdges(), self.__undirectedEdges())
+        initial = "START"
+        last = "END"
+        initialEdges = [(initial, job.operations[0]) for job in self.jobs]
+        lastEdges = [(job.operations[-1], last) for job in self.jobs]
+        directed = initialEdges + self.__directedEdges() + lastEdges
+        return ProblemGraph(initial, last, directed, self.__undirectedEdges())
 
 class ProblemGraph:
-    def __init__(self, directedEdges, undirectedEdges):
+    def __init__(self, initial, end, directedEdges, undirectedEdges):
+        self.initial = initial
+        self.end = end
         self.directedEdges = directedEdges
         self.undirectedEdges = undirectedEdges
 
@@ -70,9 +77,13 @@ problem = \
     )
 
 expectedGraph = \
-    ProblemGraph(
-        [ (Operation(0, 2, 0), Operation(1, 2, 0))
+    ProblemGraph("START", "END",
+        [ ("START", Operation(0, 2, 0))
+        , ("START", Operation(1, 3, 1))
+        , (Operation(0, 2, 0), Operation(1, 2, 0))
         , (Operation(1, 3, 1), Operation(0, 3, 1))
+        , (Operation(1, 2, 0), "END")
+        , (Operation(0, 3, 1), "END")
         ]
     ,
         [ (Operation(0, 2, 0), Operation(0, 3, 1))
