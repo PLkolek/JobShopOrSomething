@@ -59,6 +59,11 @@ class Solution:
         self.undirected = self.__undirectedEdges(problem.machineOperations)
         self.__initialSolution()
 
+    def time(self, operationId):
+        if operationId != solution.START and operationId != solution.END:
+            return self.problem.operations[operationId].time
+        return 0
+
     def __initialSolution(self):
         # Assumption: machine operations in problem are filled job by job
         # Warning: it can create duplicate edges, is that a problem?
