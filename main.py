@@ -1,5 +1,6 @@
 from evaluate import evaluate
 import copy
+import sys
 
 class Operation:
     def __init__(self, id, machine, time, job):
@@ -118,8 +119,15 @@ class Solution:
         return self.__str__()
 
 
+numberOfMachines = int(input(""))
+jobs = []
+for line in sys.stdin:
+    numbers = [int(n) for n in line.split()]
+    machines = numbers[::2]
+    times = numbers[1::2]
+    jobs.append(zip(machines, times))
 
-problem = Problem(2, [ [(0, 2), (1, 2), (0, 1)], [(1, 3), (0, 3), (0, 4)] ] )
+problem = Problem(numberOfMachines, jobs )
 solution = Solution.initial(problem)
 print(problem)
 print(solution)
