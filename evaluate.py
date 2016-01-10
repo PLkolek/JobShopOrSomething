@@ -2,6 +2,7 @@ class VertexMetadata:
     def __init__(self):
         self.inDegree = 0
         self.longestPath = 0
+        self.previousV = -1
     def __str__(self):
         return str(self.__dict__)
     def __repr__(self):
@@ -18,13 +19,17 @@ def evaluate(solution):
 
         for adj in solution.directed[current]:
             v[adj].inDegree -= 1
-            if path > v[adj].longestPath:
+            if path >= v[adj].longestPath:
                 v[adj].longestPath = path
+                v[adj].previousV = current
             if v[adj].inDegree == 0:
                 noInputV.append(adj)
 
     __checkCycle(v, solution)
-    return v[solution.END].longestPath
+    print(v)
+    path = __criticalPath(solution, v)
+    pathLength = v[solution.END].longestPath
+    return (path, pathLength)
 
 def __inDegrees(solution, v):
     for s in range(0, len(solution.directed)):
@@ -38,3 +43,11 @@ def __checkCycle(v, solution):
         print("Current vertices metadata is: ")
         print(v)
         raise "Suicide"
+
+def __criticalPath(solution, v):
+    path = []
+    current = v[solution.END].previousV
+    while current != solution.START:
+        path.append(current)
+        current = v[current].previousV
+    return list(reversed(path))
