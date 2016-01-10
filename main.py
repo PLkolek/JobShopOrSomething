@@ -60,28 +60,28 @@ class Solution:
         START = len(problem.operations)
         END = len(problem.operations) + 1
 
-        directed = [[] for x in range(0, len(problem.operations) + 2)]
-        directed[START] = [Edge(job[0], False) for job in problem.jobs]
+        edges = [[] for x in range(0, len(problem.operations) + 2)]
+        edges[START] = [Edge(job[0], False) for job in problem.jobs]
         for job in problem.jobs:
-            directed[job[-1]].append(Edge(END, False))
+            edges[job[-1]].append(Edge(END, False))
 
         paired = [pair(job) for job in problem.jobs]
         jobEdges = flatten(paired)
         for (s, e) in jobEdges:
-            directed[s].append(Edge(e, False))
+            edges[s].append(Edge(e, False))
 
         # Assumption: machine operations in problem are filled job by job
         # Warning: it can create duplicate edges, is that a problem?
         for ops in problem.machineOperations:
             for (s, e) in pair(ops):
-                directed[s].append(Edge(e, True))
-        return Solution(problem, START, END, directed)
+                edges[s].append(Edge(e, True))
+        return Solution(problem, START, END, edges)
 
-    def __init__(self, problem, start, end, directed):
+    def __init__(self, problem, start, end, edges):
         self.problem = problem
         self.START = start
         self.END = end
-        self.directed = directed
+        self.edges = edges
 
     def time(self, operationId):
         if operationId != solution.START and operationId != solution.END:
@@ -96,10 +96,10 @@ class Solution:
         return neighbours
 
     def __hasReversableEdge(self, s, e):
-        return Edge(e, True) in self.directed[s]
+        return Edge(e, True) in self.edges[s]
 
     def __revertedEdge(self, s, e):
-        edgesCopy = [copy.copy(edges) for edges in self.directed]
+        edgesCopy = [copy.copy(edges) for edges in self.edges]
         edgesCopy[s].remove(Edge(e, True))
         edgesCopy[e].append(Edge(s, True))
         return Solution(self.problem, self.START, self.END, edgesCopy)

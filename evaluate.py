@@ -10,14 +10,14 @@ class VertexMetadata:
 
 
 def evaluate(solution):
-    v = [VertexMetadata() for i in range(0, len(solution.directed))]
+    v = [VertexMetadata() for i in range(0, len(solution.edges))]
     __inDegrees(solution, v)
     noInputV = [solution.START]
     while noInputV:
         current = noInputV.pop()
         path = v[current].longestPath + solution.time(current)
 
-        for edge in solution.directed[current]:
+        for edge in solution.edges[current]:
             adj = edge.target
             v[adj].inDegree -= 1
             if path >= v[adj].longestPath:
@@ -33,8 +33,8 @@ def evaluate(solution):
     return (path, pathLength)
 
 def __inDegrees(solution, v):
-    for s in range(0, len(solution.directed)):
-        for e in solution.directed[s]:
+    for s in range(0, len(solution.edges)):
+        for e in solution.edges[s]:
             v[e.target].inDegree += 1
 
 def __checkCycle(v, solution):
