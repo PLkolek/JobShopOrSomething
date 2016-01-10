@@ -1,5 +1,6 @@
 class Operation:
-    def __init__(self, machine, time, job):
+    def __init__(self, id, machine, time, job):
+        self.id = id
         self.machine = machine
         self.time = time
         self.job = job
@@ -9,10 +10,6 @@ class Operation:
 
     def __repr__(self):
         return self.__str__()
-
-class Job:
-    def __init__(self, operations):
-        self.operations = operations
 
 def pair(l):
     return list(zip(l[:-1], l[1:]))
@@ -30,68 +27,45 @@ def flatten(list):
 class Problem:
     def __init__(self, numberOfMachines, jobs):
         self.numberOfMachines = numberOfMachines
-        self.jobs = jobs
+        self.jobs = []
         self.machineOperations = [[] for i in range(numberOfMachines)]
-        for job in self.jobs:
-            for op in job.operations:
-                self.machineOperations[op.machine].append(op)
+        self.operations = []
+        for jobI in range(0, len(jobs)):
+            self.jobs.append([])
+            for (machine, time) in jobs[jobI]:
+                op = Operation(len(self.operations), machine, time, jobI)
+                self.jobs[jobI].append(op.id)
+                self.operations.append(op)
+                self.machineOperations[op.machine].append(op.id)
+    def __str__(self):
+        return str(self.__dict__)
 
-    def __directedEdges(self):
-        paired = [pair(job.operations) for job in self.jobs]
+class Solution:
+    def __init__(self, problem):
+        self.START = len(problem.operations)
+        self.END = len(problem.operations) + 1
+
+        self.directed = [[] for x in range(0, len(problem.operations) + 2)]
+        self.directed[self.START] = [job[0] for job in problem.jobs]
+        for job in problem.jobs:
+            self.directed[job[-1]].append(self.END)
+        for (s, e) in self.__directedEdges(problem.jobs):
+            self.directed[s].append(e)
+
+        self.undirected = self.__undirectedEdges(problem.machineOperations)
+
+    def __directedEdges(self, jobs):
+        paired = [pair(job) for job in jobs]
         return flatten(paired)
 
-    def __undirectedEdges(self):
-        paired = [cyclePair(operations) for operations in self.machineOperations]
+    def __undirectedEdges(self, machineOperations):
+        paired = [cyclePair(operations) for operations in machineOperations]
         directed = flatten(paired)
         return directed + [edge[::-1] for edge in directed]
-
-    def asGraph(self):
-        initial = "START"
-        last = "END"
-        initialEdges = [(initial, job.operations[0]) for job in self.jobs]
-        lastEdges = [(job.operations[-1], last) for job in self.jobs]
-        directed = initialEdges + self.__directedEdges() + lastEdges
-        return ProblemGraph(initial, last, directed, self.__undirectedEdges())
-
-class ProblemGraph:
-    def __init__(self, initial, end, directedEdges, undirectedEdges):
-        self.initial = initial
-        self.end = end
-        self.directedEdges = directedEdges
-        self.undirectedEdges = undirectedEdges
 
     def __str__(self):
         return str(self.__dict__)
 
-problem = \
-    Problem(2,
-        [ Job(
-            [ Operation(0, 2, 0)
-            , Operation(1, 2, 0)
-            ])
-        , Job(
-            [ Operation(1, 3, 1)
-            , Operation(0, 3, 1)
-            ])
-        ]
-    )
-
-expectedGraph = \
-    ProblemGraph("START", "END",
-        [ ("START", Operation(0, 2, 0))
-        , ("START", Operation(1, 3, 1))
-        , (Operation(0, 2, 0), Operation(1, 2, 0))
-        , (Operation(1, 3, 1), Operation(0, 3, 1))
-        , (Operation(1, 2, 0), "END")
-        , (Operation(0, 3, 1), "END")
-        ]
-    ,
-        [ (Operation(0, 2, 0), Operation(0, 3, 1))
-        , (Operation(1, 2, 0), Operation(1, 3, 1))
-        , (Operation(0, 3, 1), Operation(0, 2, 0))
-        , (Operation(1, 3, 1), Operation(1, 2, 0))
-        ]
-    )
-
-print(problem.asGraph())
-print(expectedGraph)
+problem = Problem(2, [ [(0, 2), (1, 2), (0, 1)], [(1, 3), (0, 3), (0, 4)] ] )
+print(problem)
+print(Solution(problem))
