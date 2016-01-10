@@ -42,6 +42,8 @@ class Problem:
 
 class Solution:
     def __init__(self, problem):
+        self.problem = problem
+
         self.START = len(problem.operations)
         self.END = len(problem.operations) + 1
 
@@ -53,6 +55,14 @@ class Solution:
             self.directed[s].append(e)
 
         self.undirected = self.__undirectedEdges(problem.machineOperations)
+        self.__initialSolution()
+
+    def __initialSolution(self):
+        # Assumption: machine operations in problem are filled job by job
+        # Warning: it can create duplicate edges, is that a problem?
+        for ops in problem.machineOperations:
+            for (s, e) in pair(ops):
+                self.directed[s].append(e)
 
     def __directedEdges(self, jobs):
         paired = [pair(job) for job in jobs]
