@@ -17,7 +17,8 @@ def evaluate(solution):
         current = noInputV.pop()
         path = v[current].longestPath + solution.time(current)
 
-        for adj in solution.directed[current]:
+        for edge in solution.directed[current]:
+            adj = edge.target
             v[adj].inDegree -= 1
             if path >= v[adj].longestPath:
                 v[adj].longestPath = path
@@ -34,7 +35,7 @@ def evaluate(solution):
 def __inDegrees(solution, v):
     for s in range(0, len(solution.directed)):
         for e in solution.directed[s]:
-            v[e].inDegree += 1
+            v[e.target].inDegree += 1
 
 def __checkCycle(v, solution):
     if v[solution.END].inDegree != 0:

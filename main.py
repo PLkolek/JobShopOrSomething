@@ -42,6 +42,15 @@ class Problem:
     def __str__(self):
         return str(self.__dict__)
 
+class Edge:
+    def __init__(self, target, reversable):
+        self.target = target
+        self.reversable = reversable
+    def __str__(self):
+        return str(self.__dict__)
+    def __repr__(self):
+        return self.__str__()
+
 class Solution:
     def __init__(self, problem):
         self.problem = problem
@@ -50,13 +59,12 @@ class Solution:
         self.END = len(problem.operations) + 1
 
         self.directed = [[] for x in range(0, len(problem.operations) + 2)]
-        self.directed[self.START] = [job[0] for job in problem.jobs]
+        self.directed[self.START] = [Edge(job[0], False) for job in problem.jobs]
         for job in problem.jobs:
-            self.directed[job[-1]].append(self.END)
+            self.directed[job[-1]].append(Edge(self.END, False))
         for (s, e) in self.__directedEdges(problem.jobs):
-            self.directed[s].append(e)
+            self.directed[s].append(Edge(e, False))
 
-        self.undirected = self.__undirectedEdges(problem.machineOperations)
         self.__initialSolution()
 
     def time(self, operationId):
@@ -69,16 +77,11 @@ class Solution:
         # Warning: it can create duplicate edges, is that a problem?
         for ops in problem.machineOperations:
             for (s, e) in pair(ops):
-                self.directed[s].append(e)
+                self.directed[s].append(Edge(e, True))
 
     def __directedEdges(self, jobs):
         paired = [pair(job) for job in jobs]
         return flatten(paired)
-
-    def __undirectedEdges(self, machineOperations):
-        paired = [cyclePair(operations) for operations in machineOperations]
-        directed = flatten(paired)
-        return directed + [edge[::-1] for edge in directed]
 
     def __str__(self):
         return str(self.__dict__)
