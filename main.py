@@ -1,3 +1,5 @@
+from evaluate import evaluate
+
 class Operation:
     def __init__(self, id, machine, time, job):
         self.id = id
@@ -76,6 +78,12 @@ class Solution:
     def __str__(self):
         return str(self.__dict__)
 
+
+
+
 problem = Problem(2, [ [(0, 2), (1, 2), (0, 1)], [(1, 3), (0, 3), (0, 4)] ] )
+solution = Solution(problem)
 print(problem)
-print(Solution(problem))
+print(solution)
+
+print(evaluate(solution))
