@@ -17,6 +17,13 @@ class Operation:
 def pair(l):
     return list(zip(l[:-1], l[1:]))
 
+def pairAll(l):
+    result = []
+    for i in range(0, len(l)):
+        for j in range(i + 1, len(l)):
+            result.append((l[i], l[j]))
+    return result
+
 def cyclePair(l):
     if len(l) <= 3:
         return pair(l)
@@ -73,7 +80,7 @@ class Solution:
         # Assumption: machine operations in problem are filled job by job
         # Warning: it can create duplicate edges, is that a problem?
         for ops in problem.machineOperations:
-            for (s, e) in pair(ops):
+            for (s, e) in pairAll(ops):
                 edges[s].append(Edge(e, True))
         return Solution(problem, START, END, edges)
 
