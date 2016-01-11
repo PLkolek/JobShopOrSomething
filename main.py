@@ -1,6 +1,7 @@
 from evaluate import evaluate
 import copy
 import sys
+from collections import deque
 
 class Operation:
     def __init__(self, id, machine, time, job):
@@ -100,7 +101,8 @@ class Solution:
         neighbours = []
         for (s, e) in pair(criticalPath):
             if self.__hasReversableEdge(s, e):
-                neighbours.append(solution.__revertedEdge(s, e))
+                move = (s,e)
+                neighbours.append((solution.__revertedEdge(s, e),move))
         return neighbours
 
     def __hasReversableEdge(self, s, e):
@@ -118,21 +120,61 @@ class Solution:
     def __repr__(self):
         return self.__str__()
 
+def get_new_solution(startSol,startPath,tabuList):
+    neighbours = startSol.neighbours(startPath)
+    (sol,move) = neighbours[0]
+    (solPath,solVal) =  evaluate(sol)
+    for j in range(1,neighbours.__len__()):
+        (newSol, newMove) = neighbours[j]
+        if newMove not in tabuList:
+            (newSolPath,newSolVal) = evaluate(newSol)
+            if newSolVal < solVal:
+                sol = newSol
+                move = newMove
+                solVal= newSolVal
+                solPath = newSolPath
+    return sol, move, solVal, solPath
 
-numberOfMachines = int(input(""))
+def tabu_search(initSol):
+    MAX_ITER = 100
+    MAX_LEN = 10
+    tabuList = deque(maxlen=MAX_LEN)
+    bestSol = initSol
+    (solPath,bestSolVal) = evaluate(initSol)
+    sol = initSol
+    solVal = bestSolVal
+    i = 0
+    #TO DO: better condition
+    while i < MAX_ITER:  
+        i += 1
+        sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
+        if tabuList.__len__() == MAX_LEN:
+            tabuList.pop()
+        tabuList.append(move)
+        if solVal < bestSolVal:
+            bestSol = sol
+            bestSolVal = solVal
+    return bestSolVal
+
 jobs = []
-for line in sys.stdin:
+for place, line in enumerate(sys.stdin):
     numbers = [int(n) for n in line.split()]
-    machines = numbers[::2]
-    times = numbers[1::2]
-    jobs.append(zip(machines, times))
+    if place == 0:
+        numberOfMachines = numbers[0]
+        numberOfJobs = numbers[1]
+    else:
+        machines = numbers[::2]
+        times = numbers[1::2]
+        jobs.append(zip(machines, times))
 
 problem = Problem(numberOfMachines, jobs )
 solution = Solution.initial(problem)
-print(problem)
-print(solution)
+#print(problem)
+#print(solution)
 
 (path, length) = evaluate(solution)
-print((path, length))
+print(length)
 
-print(solution.neighbours(path))
+#print(solution.neighbours(path))
+print tabu_search(solution)
+
