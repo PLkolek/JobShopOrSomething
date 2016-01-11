@@ -160,7 +160,7 @@ def tabu_search(initSol):
         i += 1
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
         if tabuList.__len__() == MAX_LEN:
-            tabuList.pop()
+            tabuList.popleft()
         tabuList.append(sol)
         if solVal < bestSolVal:
             bestSol = sol
