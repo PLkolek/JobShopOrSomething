@@ -57,7 +57,7 @@ class Edge:
         self.target = target
         self.reversable = reversable
     def __str__(self):
-        return str(self.__dict__)
+        return "({0}, {1})".format(self.target, self.reversable)
     def __repr__(self):
         return self.__str__()
     def __eq__(self, other):
@@ -93,7 +93,7 @@ class Solution:
         self.edges = edges
 
     def time(self, operationId):
-        if operationId != solution.START and operationId != solution.END:
+        if operationId != self.START and operationId != self.END:
             return self.problem.operations[operationId].time
         return 0
 
@@ -102,7 +102,7 @@ class Solution:
         for (s, e) in pair(criticalPath):
             if self.__hasReversableEdge(s, e):
                 move = (s,e)
-                neighbours.append((solution.__revertedEdge(s, e),move))
+                neighbours.append((self.__revertedEdge(s, e),move))
         return neighbours
 
     def __hasReversableEdge(self, s, e):
@@ -115,7 +115,13 @@ class Solution:
         return Solution(self.problem, self.START, self.END, edgesCopy)
 
     def __str__(self):
-        return str(self.__dict__)
+        return "\n".join(
+            [ "START: " + str(self.START)
+            , "END: " + str(self.END),
+            ] +
+            [ str(i) + ": " + str(self.edges[i])
+                for i in range(0, len(self.edges))
+            ])
 
     def __repr__(self):
         return self.__str__()
@@ -136,7 +142,7 @@ def get_new_solution(startSol,startPath,tabuList):
     return sol, move, solVal, solPath
 
 def tabu_search(initSol):
-    MAX_ITER = 100
+    MAX_ITER = 1000
     MAX_LEN = 10
     tabuList = deque(maxlen=MAX_LEN)
     bestSol = initSol
@@ -145,7 +151,7 @@ def tabu_search(initSol):
     solVal = bestSolVal
     i = 0
     #TO DO: better condition
-    while i < MAX_ITER:  
+    while i < MAX_ITER:
         i += 1
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
         if tabuList.__len__() == MAX_LEN:
@@ -154,6 +160,7 @@ def tabu_search(initSol):
         if solVal < bestSolVal:
             bestSol = sol
             bestSolVal = solVal
+        print(bestSolVal)
     return bestSolVal
 
 jobs = []
@@ -169,12 +176,8 @@ for place, line in enumerate(sys.stdin):
 
 problem = Problem(numberOfMachines, jobs )
 solution = Solution.initial(problem)
-#print(problem)
-#print(solution)
 
 (path, length) = evaluate(solution)
-print(length)
 
 #print(solution.neighbours(path))
-print tabu_search(solution)
-
+tabu_search(solution)

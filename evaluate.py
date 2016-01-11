@@ -27,7 +27,6 @@ def evaluate(solution):
                 noInputV.append(adj)
 
     __checkCycle(v, solution)
-    print(v)
     path = __criticalPath(solution, v)
     pathLength = v[solution.END].longestPath
     return (path, pathLength)
@@ -41,9 +40,18 @@ def __checkCycle(v, solution):
     if v[solution.END].inDegree != 0:
         print("Cycle detected, current graph is: ")
         print(solution)
-        print("Current vertices metadata is: ")
-        print(v)
+        print("Subgraph with cycle is: ")
+        print(__graphLeft(v))
         raise "Suicide"
+
+def __graphLeft(v):
+    vi = [(i, v[i]) for i in range(0, len(v))]
+    res = []
+    for (i, m) in vi:
+        if m.inDegree > 0:
+            res.append(i)
+    return res
+
 
 def __criticalPath(solution, v):
     path = []
