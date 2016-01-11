@@ -126,24 +126,29 @@ class Solution:
     def __repr__(self):
         return self.__str__()
 
+    def __eq__(self, other):
+        return self.edges == other.edges
+
 def get_new_solution(startSol,startPath,tabuList):
     neighbours = startSol.neighbours(startPath)
     (sol,move) = neighbours[0]
     (solPath,solVal) =  evaluate(sol)
     for j in range(1,neighbours.__len__()):
         (newSol, newMove) = neighbours[j]
-        if newMove not in tabuList:
+        if newSol not in tabuList:
             (newSolPath,newSolVal) = evaluate(newSol)
             if newSolVal < solVal:
                 sol = newSol
                 move = newMove
                 solVal= newSolVal
                 solPath = newSolPath
+        else:
+            print("old move:(")
     return sol, move, solVal, solPath
 
 def tabu_search(initSol):
     MAX_ITER = 1000
-    MAX_LEN = 10
+    MAX_LEN = 1000
     tabuList = deque(maxlen=MAX_LEN)
     bestSol = initSol
     (solPath,bestSolVal) = evaluate(initSol)
@@ -156,10 +161,11 @@ def tabu_search(initSol):
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
         if tabuList.__len__() == MAX_LEN:
             tabuList.pop()
-        tabuList.append(move)
+        tabuList.append(sol)
         if solVal < bestSolVal:
             bestSol = sol
             bestSolVal = solVal
+        print(solVal)
         print(bestSolVal)
     return bestSolVal
 
