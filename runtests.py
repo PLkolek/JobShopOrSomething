@@ -12,7 +12,7 @@ def getSubdirectiories(basePath):
 def getFiles(basePath):
     return filter(os.path.isfile,getDirContent(basePath))
 
-def runTests(rirs):
+def runTests(dirs):
     baseResultPath = "results/"
     for directory in dirs:
         resultFilePath = baseResultPath + basename(directory)
@@ -27,7 +27,13 @@ def runTests(rirs):
 
 
 baseTestPath = "tests/"
+#get all tests dirs
 dirs = getSubdirectiories(baseTestPath)
-runTests(dirs)
+#/tests/15x15
+#/tests/20x15
+#/tests/20x20
+#/tests/30x15
+#/tests/30x20
+runTests([""])
 
 

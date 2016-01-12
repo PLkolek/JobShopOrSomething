@@ -153,6 +153,8 @@ def get_new_solution(startSol,startPath,tabuList):
 
 def tabu_search(initSol, tabuListSz):
     MAX_ITER = 10000
+    MAX_NO_IMPROVEMENTS = int(MAX_ITER * 0.25)
+    noImporvementsCount = 0
     tabuList = deque(maxlen=tabuListSz)
     bestSol = initSol
     (solPath,bestSolVal) = evaluate(initSol)
@@ -160,15 +162,18 @@ def tabu_search(initSol, tabuListSz):
     solVal = bestSolVal
     i = 0
     #TO DO: better condition
-    while i < MAX_ITER:
+    while i < MAX_ITER and noImporvementsCount < MAX_NO_IMPROVEMENTS:
         i += 1
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
         if tabuList.__len__() == tabuListSz:
             tabuList.popleft()
         tabuList.append(move)
         if solVal < bestSolVal:
+            noImporvementsCount = 0
             bestSol = sol
             bestSolVal = solVal
+        else:
+            noImporvementsCount += 1
         #print(move)
         #print(solVal)
         #print(bestSolVal)
