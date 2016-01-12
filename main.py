@@ -133,11 +133,12 @@ def get_new_solution(startSol,startPath,tabuList):
     neighbours = startSol.neighbours(startPath)
     (sol,move) = neighbours[0]
     (solPath,solVal) =  evaluate(sol)
-    if sol in tabuList:
+    if move in tabuList:
         solVal = 999999999
-    for j in range(1,neighbours.__len__()):
-        (newSol, newMove) = neighbours[j]
-        if newSol not in tabuList:
+    for n in neighbours:
+        (newSol, newMove) = n
+        (v1, v2) = newMove
+        if (newMove and (v2, v1)) not in tabuList:
             (newSolPath,newSolVal) = evaluate(newSol)
             if newSolVal < solVal:
                 sol = newSol
@@ -147,8 +148,8 @@ def get_new_solution(startSol,startPath,tabuList):
     return sol, move, solVal, solPath
 
 def tabu_search(initSol):
-    MAX_ITER = 100000
-    MAX_LEN = 1000
+    MAX_ITER = 10000
+    MAX_LEN = 30
     tabuList = deque(maxlen=MAX_LEN)
     bestSol = initSol
     (solPath,bestSolVal) = evaluate(initSol)
@@ -161,14 +162,14 @@ def tabu_search(initSol):
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
         if tabuList.__len__() == MAX_LEN:
             tabuList.popleft()
-        tabuList.append(sol)
+        tabuList.append(move)
         if solVal < bestSolVal:
             bestSol = sol
             bestSolVal = solVal
         #print(move)
-        print(solVal)
-        print(bestSolVal)
-        print()
+        #print(solVal)
+        #print(bestSolVal)
+        #print()
     return bestSolVal
 
 jobs = []
@@ -188,4 +189,4 @@ solution = Solution.initial(problem)
 (path, length) = evaluate(solution)
 
 #print(solution.neighbours(path))
-tabu_search(solution)
+print tabu_search(solution)
