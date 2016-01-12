@@ -2,6 +2,7 @@ from evaluate import evaluate
 import copy
 import sys
 from collections import deque
+import math
 
 class Operation:
     def __init__(self, id, machine, time, job):
@@ -51,6 +52,9 @@ class Problem:
                 self.machineOperations[op.machine].append(op.id)
     def __str__(self):
         return str(self.__dict__)
+
+    def numberOfOperations(self):
+        return self.operations.__len__()
 
 class Edge:
     def __init__(self, target, reversable):
@@ -147,10 +151,9 @@ def get_new_solution(startSol,startPath,tabuList):
                 solPath = newSolPath
     return sol, move, solVal, solPath
 
-def tabu_search(initSol):
+def tabu_search(initSol, tabuListSz):
     MAX_ITER = 10000
-    MAX_LEN = 30
-    tabuList = deque(maxlen=MAX_LEN)
+    tabuList = deque(maxlen=tabuListSz)
     bestSol = initSol
     (solPath,bestSolVal) = evaluate(initSol)
     sol = initSol
@@ -160,7 +163,7 @@ def tabu_search(initSol):
     while i < MAX_ITER:
         i += 1
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
-        if tabuList.__len__() == MAX_LEN:
+        if tabuList.__len__() == tabuListSz:
             tabuList.popleft()
         tabuList.append(move)
         if solVal < bestSolVal:
@@ -172,21 +175,24 @@ def tabu_search(initSol):
         #print()
     return bestSolVal
 
-jobs = []
-for place, line in enumerate(sys.stdin):
-    numbers = [int(n) for n in line.split()]
-    if place == 0:
-        numberOfMachines = numbers[0]
-        numberOfJobs = numbers[1]
-    else:
-        machines = numbers[::2]
-        times = numbers[1::2]
-        jobs.append(zip(machines, times))
+def solve(file):
+    jobs = []
+    for place, line in enumerate(file):
+        numbers = [int(n) for n in line.split()]
+        if place == 0:
+            numberOfMachines = numbers[0]
+            numberOfJobs = numbers[1]
+        else:
+            machines = numbers[::2]
+            times = numbers[1::2]
+            jobs.append(zip(machines, times))
+    problem = Problem(numberOfMachines, jobs )
+    opNumber = problem.numberOfOperations()
 
-problem = Problem(numberOfMachines, jobs )
-solution = Solution.initial(problem)
+    solution = Solution.initial(problem)
+    (path, length) = evaluate(solution)
 
-(path, length) = evaluate(solution)
+    tabuListSz  = int(math.ceil(math.sqrt(opNumber)))
+    return tabu_search(solution, tabuListSz)
 
-#print(solution.neighbours(path))
-print tabu_search(solution)
+#print solve(sys.stdin)
