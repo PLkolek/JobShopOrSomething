@@ -2,6 +2,7 @@ from evaluate import evaluate
 import copy
 import sys
 from collections import deque
+import math
 
 class Operation:
     def __init__(self, id, machine, time, job):
@@ -51,6 +52,9 @@ class Problem:
                 self.machineOperations[op.machine].append(op.id)
     def __str__(self):
         return str(self.__dict__)
+
+    def numberOfOperations(self):
+        return self.operations.__len__()
 
 class Edge:
     def __init__(self, target, reversable):
@@ -133,11 +137,12 @@ def get_new_solution(startSol,startPath,tabuList):
     neighbours = startSol.neighbours(startPath)
     (sol,move) = neighbours[0]
     (solPath,solVal) =  evaluate(sol)
-    if sol in tabuList:
+    if move in tabuList:
         solVal = 999999999
-    for j in range(1,neighbours.__len__()):
-        (newSol, newMove) = neighbours[j]
-        if newSol not in tabuList:
+    for n in neighbours:
+        (newSol, newMove) = n
+        (v1, v2) = newMove
+        if (newMove and (v2, v1)) not in tabuList:
             (newSolPath,newSolVal) = evaluate(newSol)
             if newSolVal < solVal:
                 sol = newSol
@@ -146,46 +151,53 @@ def get_new_solution(startSol,startPath,tabuList):
                 solPath = newSolPath
     return sol, move, solVal, solPath
 
-def tabu_search(initSol):
-    MAX_ITER = 100000
-    MAX_LEN = 1000
-    tabuList = deque(maxlen=MAX_LEN)
+def tabu_search(initSol, tabuListSz):
+    MAX_ITER = 10000
+    MAX_NO_IMPROVEMENTS = int(MAX_ITER * 0.25)
+    noImporvementsCount = 0
+    tabuList = deque(maxlen=tabuListSz)
     bestSol = initSol
     (solPath,bestSolVal) = evaluate(initSol)
     sol = initSol
     solVal = bestSolVal
     i = 0
     #TO DO: better condition
-    while i < MAX_ITER:
+    while i < MAX_ITER and noImporvementsCount < MAX_NO_IMPROVEMENTS:
         i += 1
         sol, move, solVal, solPath = get_new_solution(sol,solPath,tabuList)
-        if tabuList.__len__() == MAX_LEN:
+        if tabuList.__len__() == tabuListSz:
             tabuList.popleft()
-        tabuList.append(sol)
+        tabuList.append(move)
         if solVal < bestSolVal:
+            noImporvementsCount = 0
             bestSol = sol
             bestSolVal = solVal
+        else:
+            noImporvementsCount += 1
         #print(move)
-        print(solVal)
-        print(bestSolVal)
-        print()
+        #print(solVal)
+        #print(bestSolVal)
+        #print()
     return bestSolVal
 
-jobs = []
-for place, line in enumerate(sys.stdin):
-    numbers = [int(n) for n in line.split()]
-    if place == 0:
-        numberOfMachines = numbers[0]
-        numberOfJobs = numbers[1]
-    else:
-        machines = numbers[::2]
-        times = numbers[1::2]
-        jobs.append(zip(machines, times))
+def solve(file):
+    jobs = []
+    for place, line in enumerate(file):
+        numbers = [int(n) for n in line.split()]
+        if place == 0:
+            numberOfMachines = numbers[0]
+            numberOfJobs = numbers[1]
+        else:
+            machines = numbers[::2]
+            times = numbers[1::2]
+            jobs.append(zip(machines, times))
+    problem = Problem(numberOfMachines, jobs )
+    opNumber = problem.numberOfOperations()
 
-problem = Problem(numberOfMachines, jobs )
-solution = Solution.initial(problem)
+    solution = Solution.initial(problem)
+    (path, length) = evaluate(solution)
 
-(path, length) = evaluate(solution)
+    tabuListSz  = int(math.ceil(math.sqrt(opNumber)))
+    return tabu_search(solution, tabuListSz)
 
-#print(solution.neighbours(path))
-tabu_search(solution)
+#print solve(sys.stdin)
