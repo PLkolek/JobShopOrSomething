@@ -1,0 +1,14 @@
+tests/15x15/ta01 1299
+tests/15x15/ta02 1271
+tests/15x15/ta03 1302
+tests/15x15/ta04 1243
+tests/15x15/ta05 1281
+tests/15x15/ta06 1294
+tests/15x15/ta07 1296
+tests/15x15/ta08 1292
+tests/15x15/ta09 1364
+tests/15x15/ta10 1315
+
+real	16m41.104s
+user	15m22.184s
+sys	0m0.370s

@@ -1,0 +1,206 @@
+\documentclass[english]{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{polski}
+\usepackage{hyperref}
+
+
+\mode<presentation> {
+  \usetheme{Warsaw}
+  \setbeamertemplate{headline}{}
+}
+
+\usepackage{amsmath}
+
+\usepackage{harpoon}
+\newcommand{\llharp}{\text{\overleftharp{$\leftharpoondown$}}}
+
+\usepackage{accsupp}
+\newcommand*{\llbrace}{
+  \BeginAccSupp{method=hex,unicode,ActualText=2983}
+    \textnormal{\usefont{OMS}{lmr}{m}{n}\char102}
+    \mathchoice{\mkern-4.05mu}{\mkern-4.05mu}{\mkern-4.3mu}{\mkern-4.8mu}
+    \textnormal{\usefont{OMS}{lmr}{m}{n}\char106}
+  \EndAccSupp{}
+}
+\newcommand*{\rrbrace}{
+  \BeginAccSupp{method=hex,unicode,ActualText=2984}
+    \textnormal{\usefont{OMS}{lmr}{m}{n}\char106}
+    \mathchoice{\mkern-4.05mu}{\mkern-4.05mu}{\mkern-4.3mu}{\mkern-4.8mu}
+    \textnormal{\usefont{OMS}{lmr}{m}{n}\char103}
+  \EndAccSupp{}
+}
+
+\newcommand{\bbraced}[1]{\llbrace #1 \rrbrace}
+\newcommand{\bangled}[1]{\llangle #1 \rrangle}
+
+\makeatletter
+\newenvironment<>{proofs}[1][\proofname]{%
+    \par
+    \def\insertproofname{#1\@addpunct{.}}%
+    \usebeamertemplate{proof begin}#2}
+  {\usebeamertemplate{proof end}}
+\makeatother
+
+%------------------------------------------------
+
+\title[Praktyka optymalizacji]{Praktyka optymalizacji - temat 6}
+
+\author{Mateusz Kołaczek, Filip Pawlak, Radosław Żórawicz}
+\institute[UWr]{
+  Uniwersytet Wrocławski
+}
+\date{3.01.2016}
+
+%------------------------------------------------
+
+\begin{document}
+
+%------------------------------------------------
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%------------------------------------------------
+
+%% \begin{frame}
+%% \frametitle{Overview}
+%% \tableofcontents
+%% \end{frame}
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Opis problemu}
+\textbf{Stacja diagnostyczna.} Stacja posiada wiele stanowisk, na których są wykonywane ustalone badania diagnostyczne, w ramach przeglądów gwarancyjnych pewnej marki samochodów. Dla każdego typu samochodu jest ustalona kolejność stanowisk, przez które przechodzi pojazd i czasy obsługi na każdym stanowisku (różne samochody przechodzą przez różne stanowiska i mają różne czasy obsługi). Dla ustalonego na konkretny dzień zbioru samochodów, zaplanować ich obsługę tak, aby czas zejścia ostatniego obsługiwanego samochodu z ostatniego stanowiska był minimalny.
+\end{frame}
+
+\begin{frame}
+\frametitle{Opis problemu - inaczej}
+Instancja naszego problemu to trójka $(M, O, J)$ składająca się ze:
+
+\begin{itemize}
+\item zbioru maszyn $M$
+\item zbioru $J$ zadań, będących ciągami operacji $(o_{1}, ..., o_{n})$ (każda operacja występuje dokładnie raz)  
+\item zbioru operacji $O$, gdzie dla każdego $o \in O$ określamy maszynę $m(o) \in M$, czas trwania $d(o) \in \mathbb{N}$ oraz zadanie $j(o) \in J$ do którego operacja należy
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Czego szukamy?}
+Harmonogram operacji przyporządkowuje każdemu $o \in O$ czas rozpoczęcia $b(o) \geq 0$ w taki sposób, że:
+
+\begin{itemize}
+  \item $b(o) \geq b(o') + d(o')$ dla operacji $o'$ takich że $j(o) = j(o')$ i $o'$ występuje wcześniej w zadaniu
+  \item $b(o) \geq b(o') + d(o')$ lub $b(o') \geq b(o) + d(o)$ dla $o'$ takich że $m(o') = m(o)$ i $o \neq o'$
+  
+\end{itemize}
+\pause
+Chcemy znaleźć harmonogram, dla którego wartość \[ \max_{o \in O} b(o) + d(o) \] jest minimalna.
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Reprezentacja grafowa}
+Do reprezentacji naszego problemuużywamy tzw. grafów rozłącznych, w których $V = O$ i występują dwa rodzaje krawędzi:
+
+\begin{itemize}
+  \item jeśli operacja $o$ musi być wykonana przed operacją $o'$, to w grafie umieszczamy krawędź skierowaną z $o$ do $o'$
+  \item jeżeli zaś $o$ i $o'$ mogą być wykonane w dowolnej kolejności,ale nie w tym samym czasie (gdyż $m(o) = m(o')$), to umieszczamy między nimi krawędź nieskierowaną
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reprezentacja grafowa}
+  Każde wykonalne uszeregowanie zadań odpowiada takiemu wyborowi skierowanych krawędzi 
+  (pomiędzy wierchołkami zadań przetwarzanych na tych samych maszynach), dla którego otrzymany graf jest acykliczny.\newline\newline\pause
+  Graf zawiera dwa dodatkowe "sztuczne" węzły reprezentujące początek i koniec wykonywania zadań.\newline\newline\pause
+  Czas przetworzenia całego ciągu zadań równy jest wadze ścieżki krytycznej z węzła startowego do węzła końcowego.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reprezentacja grafowa}
+  \includegraphics[width=\textwidth]{graf2}
+  \vspace{10pt}
+  Graf rozłączny G dla instancji problemu z 3 zadaniami i 3 maszynami.  Operacje 1, 5 i 9 wykonywane są na maszynie 1.
+  0,Operacje 2, 4 i 8 na maszynie 2. Operacje 6, 7 i 10 na maszynie 3. Węzły 0 oraz 10 reprezentują początek i koniec obliczeń.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Rozwiązanie początkowe}
+  Przetwarzamy zadania w ustalonej kolejności. Operacje do wykonania w ramach każdego zadania wpisujemy 
+  na kolejną pozycję listy odpowiedniej maszyny. Na podstawie list  zamieniamy krawędzie nieskierowane grafu
+  na sierowane.
+\end{frame}
+
+\begin{frame}
+\frametitle{Generowanie sąsiadów}
+Wybieramy dwa wierzchołkii $v$, $w$ takie, że:
+\begin{enumerate}
+  \item v oraz w są kolejnymi operacjami na pewnej maszynie
+  \item krawędź $(v,w)$ jest krytycznym łukiem, tzn. leży na najdłuższej ścieżce w grafie reprezętującym aktualne rozwiązanie
+\end{enumerate}
+Odwaracamy kolejność w jakiej $u,v$ są przetwarzane na danej maszynie. 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dane testowe}
+  Do testów wykorzstano instacje testowe autorstwa proefsora Erica Taillarda:
+  \begin{itemize}
+  \item 15 maszyn, 15 zadań
+  \item 20 maszyn, 15 zadań
+  \item 20 maszyn, 20 zadań
+  \item 30 maszyn, 15 zadań
+  \item 30 maszyn, 20 zadań
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dane testowe}
+  Do testów wykorzstano instacje testowe autorstwa proefsora Erica Taillarda:
+  \begin{itemize}
+  \item 15 maszyn, 15 zadań
+  \item 20 maszyn, 15 zadań
+  \item 20 maszyn, 20 zadań
+  \item 30 maszyn, 15 zadań
+  \item 30 maszyn, 20 zadań
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dolne ograniczenia}
+  Najlepsze znane (na dzień 8.09.2015) dolne ograniczenia rozwiązań instacji Taillarda pobrano ze strony 
+  profesora Olega Shylo z Unwersytetu Tennessee (\url{http://optimizizer.com/TA.php}).
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Bibliografia}
+
+\begin{thebibliography}{99}
+\bibitem{pa} Philippe Fortemps, Maciej Hapke:
+\emph{On the disjunctive graph for project schedulling},
+\bibitem{pa} Peter J. M. van Laarhoven, Emile H. L. Aarts, Jan Karel Lenstra:
+\emph{Job Shop Scheduling by Simulated Annealing},
+Operations Research, Vol. 40, No. 1 (Jan. - Feb., 1992), pp. 113-125
+\bibitem{pa} 
+\emph http://gki.informatik.uni-freiburg.de/lehre/ws0203/aip/lecture28.pdf
+
+\end{thebibliography}
+
+\end{frame}
+
+
+\end{document}

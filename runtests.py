@@ -34,6 +34,6 @@ dirs = getSubdirectiories(baseTestPath)
 #/tests/20x20
 #/tests/30x15
 #/tests/30x20
-runTests([""])
+runTests(["tests/20x15"])
 
 
